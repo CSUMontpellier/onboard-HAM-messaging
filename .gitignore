@@ -1,0 +1,8 @@
+
+# Sphinx GITIGNORE
+# sphinx build folder
+docs/_build
+
+
+# Python
+*.pyc
