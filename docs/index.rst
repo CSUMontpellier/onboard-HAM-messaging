@@ -14,9 +14,7 @@ The purpose of this project is to involve HAM Radio members in the development a
    :maxdepth: 2
    :caption: Contents:
 
-   source/overview
-   source/hardware
-   source/firmware
+   source/ttc
    source/ham_msg
    source/testing
 
