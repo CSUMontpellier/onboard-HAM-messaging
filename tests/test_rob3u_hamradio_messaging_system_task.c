@@ -553,17 +553,32 @@ void test_ham_handle_user_cmd(void) {
     TEST_ASSERT_NOT_EQUAL_UINT8(pckt_sent_from_ham->data[1], HAM_INV_CMD);
 }
 
+void test_string_to_int(void){
+    /* Creat a valid string that can be converted in to integer. */
+    uint8_t valid_test_str[3]={'1','2','3'};
+    /* Creat a invalid string that cant be converted in to integer. */
+    uint8_t invalid_test_str[3]={'a','2','3'};
+    uint32_t res;
+    uint8_t rv;
+
+    /* Try to convert the created strings and check the return value. */
+    rv=string_to_int(&valid_test_str,3,&res);
+    TEST_ASSERT_EQUAL_UINT8(0, rv);
+    rv=string_to_int(&invalid_test_str,3,&res);
+    TEST_ASSERT_EQUAL_UINT8(1, rv);
+}
+
 void test_ham_handle_upd_not_sent_msg_delay_cmd(void) {
     /* Creat a variable to hold the delay time read from eeprom. */
     uint32_t eeprom_delay = 0;
     /* Initialize the delay time used for deleting the messages according the tag. */
     ham_msg_delay_t msg_delay = {HAM_SENT_MSG_DELAY, HAM_NOT_SENT_MSG_DELAY};
     /* Initialize a different delay value. */
-    uint8_t test_not_sent_delay[HAM_MSG_MAX_DELAY_LEN] = {'2',  '5',  '\0',
-                                                          '\0', '\0', '\0'};
+    uint8_t test_not_sent_delay[HAM_NOT_SENT_MSG_MAX_DELAY_LEN] = {'4',  '3',  '2',
+                                                          '2', '1', '\0'};
 
     /* Fill the admin packet data part with the test not sent delay value. */
-    memcpy(ham_admin_pckt->data, test_not_sent_delay, HAM_MSG_MAX_DELAY_LEN);
+    memcpy(ham_admin_pckt->data, test_not_sent_delay, HAM_NOT_SENT_MSG_MAX_DELAY_LEN);
 
     /* Run the function to be tested. */
     ham_handle_upd_not_sent_msg_delay_cmd(params.radio_tx_queue, &(rx_pckt->id), ham_admin_pckt,
@@ -574,7 +589,7 @@ void test_ham_handle_upd_not_sent_msg_delay_cmd(void) {
 
     /* Read and check the eerpom if the delay time is saved successfully. */
     eeprom_read_byte_array(HAM_NOT_SENT_MSG_DELAY_ADDR,
-                           (uint8_t *)&eeprom_delay, HAM_MSG_MAX_DELAY_LEN);
+                           (uint8_t *)&eeprom_delay, HAM_NOT_SENT_MSG_MAX_DELAY_LEN);
     TEST_ASSERT_EQUAL_UINT32(msg_delay.not_sent_msg, eeprom_delay);
 }
 
@@ -584,11 +599,10 @@ void test_ham_handle_upd_sent_msg_delay_cmd(void) {
     /* Initialize the delay time used for deleting the messages according the tag. */
     ham_msg_delay_t msg_delay = {HAM_SENT_MSG_DELAY, HAM_NOT_SENT_MSG_DELAY};
     /* Initialize a different delay value. */
-    uint8_t test_sent_delay[HAM_MSG_MAX_DELAY_LEN] = {'2',  '0',  '\0',
-                                                      '\0', '\0', '\0'};
+    uint8_t test_sent_delay[HAM_SENT_MSG_MAX_DELAY_LEN] = {'2',  '0',  '\0'};
 
     /* Fill the admin packet data part with the test not sent delay value. */
-    memcpy(ham_admin_pckt->data, test_sent_delay, HAM_MSG_MAX_DELAY_LEN);
+    memcpy(ham_admin_pckt->data, test_sent_delay, HAM_SENT_MSG_MAX_DELAY_LEN);
 
     /* Run the function to be tested. */
     ham_handle_upd_sent_msg_delay_cmd(params.radio_tx_queue, &(rx_pckt->id),
