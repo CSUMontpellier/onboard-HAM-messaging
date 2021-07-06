@@ -10,7 +10,7 @@ The HAM radio messaging system provides a message-exchanging service between ama
 The messaging system uses a method called ‘store and forward’ to provide this service. Messages are transported to the relay station (satellite) by a radio link, and from one geographical location to another, by the satellite orbital movement. An user sends a message to the satellite during a pass and the message is stored in the satellite's memory. The satellite then moves in its orbit, making the stored message available for other HAM radio operators. Users can request messages to the satellite which, in turn will check if there are any stored messages available for that particular operator. Finally, the message is transmitted and it arrives at its destination.
 
 .. figure:: /_static/ham.gif
-      :width: 60%
+      :width: 40%
       :align: center
       :alt: HAM radio messaging system task packet flow diagram
 
@@ -19,7 +19,7 @@ Robusta 3A TT&C
 
 The ROBUSTA 3A satellite consists of different subsystems that are in charge of performing specific functions onboard the platform. In the context of the HAM radio messaging system, the TT&C (Telemetry, Tracking and Control) subsystem is the core component that enables the exchange of data between ground stations through an RF link. In addition, this link will enable the mission control center (MCC)/User to bidirectionally communicate with the satellite for receive data and send commands to the satellite to perform actions.
 
-The embedded software (firmware) of the TT&C is implemented on top of `FreeRTOS <https://www.freertos.org/>`_ (Real-time operating system). In freeRTOS, the application is segmented into `FreeRTOS tasks <https://www.freertos.org/a00015.html>`_ which are executed periodically. Each of these tasks performs specific functions of the global application. The TT&C has several tasks which enable the forwarding of datas between the ground segment and the rest of the platform. In the context of the HAM radio sessaging system, it is important to take into account the following tasks:
+The embedded software (firmware) of the TT&C is implemented on top of `FreeRTOS <https://www.freertos.org/>`_ (Real-time operating system). In freeRTOS, the application is segmented into `FreeRTOS tasks <https://www.freertos.org/a00015.html>`_ which are executed periodically. Each of these tasks performs specific functions of the global application. The TT&C has several tasks which enable the forwarding of data between the ground segment and the rest of the platform. In the context of the HAM radio messaging system, it is important to take into account the following tasks:
 
 - **Radio Interface Task**: Implements the interface with the radio transceivers, and orchestrates the reception and transmission of data packets. The received packets are then forwarded to the radio RX processing task.
 
@@ -42,9 +42,9 @@ In freeRTOS, a common way of exchanging data between tasks is through Queues. A 
    :widths: 10 10 60
    :stub-columns: 1
 
-   *  -  Name
-      -  Data
-      -  Description
+   *  - Name
+      - Data
+      - Description
    *  - radio_tx_queue
       - csp_packet_t *
       - Stores the data that shall be transmitted by the radio through the RF path
@@ -60,7 +60,7 @@ The TT&C firmware use :ref:`CSP <CSP>` (Cubesat Space Protocol) while exchanging
 The HAM radio messaging system task is continuously checking the state of all stored messages and monitoring the :ref:`HAM radio packet RX Queue <ham-queues-definition-table>` to check if any :ref:`HAM radio packets <HAMP>` have been received. When that happens, the HAM radio messaging system task pulls the received packet from the queue and checks its validity. According to command type and command of the HAM radio packet sent, the HAM radio messaging system task will carry out different operations.
 
 .. figure:: /_static/ham_com.svg
-      :scale: 110 %
+      :scale: 150 %
       :align: center
       :alt: HAM radio communication
 
@@ -107,16 +107,16 @@ After the creation of the HAM radio packet users can use their own RF communicat
 .. figure:: /_static/ham_steps.svg
       :scale: 100 %
       :align: center
-      :alt: HAM radio messaging system flow 
+      :alt: HAM radio messaging system flow
 
 
 In the figure above we can see the steps to flow for communicate with the HAM radio messaging system.
 
-In order to ensure the security of the communication the packets sent are pseudo-encrypted using a chipher algorithm so when users receive a HAM radio packet 
-as the response of an 'ask message' command they must decrypt the crypted part of this packet with the help of the 
+In order to ensure the security of the communication the packets sent are pseudo-encrypted using a cipher algorithm so when users receive a HAM radio packet 
+as the response of an 'ask message' command they must decrypt the encrypted part of this packet with the help of the 
 :ref:`data diffusion platform <DDP>` in order to read the message it contain.
 
-More details about the encryption can be found :ref:`HAM radio packet encryption section <ENCR>`.
+More details about the encryption can be found in the :ref:`HAM radio packet encryption <ENCR>` section.
 
 .. _CSP:
 
@@ -162,9 +162,9 @@ be configured in a specific manner, look into the :ref:`HAM radio packet<HAMP>` 
    :header-rows: 1
    :widths: 10 10 60
 
-   *  -  Field name
-      -  Description
-      -  Value
+   *  - Field name
+      - Description
+      - Value
    *  - Priority
       - The priority of the packet
       - 0x02
@@ -206,7 +206,7 @@ If the CRC flag is set to true a CRC must be calculated and added at the end of 
 HAM Radio Packet
 ----------------
 The HAM radio packet is basically a :ref:`radio packet <RP>` where the 'data to send' field is configured in a specific manner.
-The HAM radio messaging system have two differents command type and seven differents command that can be used.
+The HAM radio messaging system have two different command type and seven different command that can be used.
 Command types are divided into user and administrator commands. The user type commands are the commands that can be used from radio amateur users,
 the admin type commands are the private commands that can be used only from CSUM operators. Commands itself are actions that are requested to be executed.
 More information about command types and commands can be found in the tables below.
@@ -253,7 +253,7 @@ More information about command types and commands can be found in the tables bel
       - Change not sent message delay
       - 'n'
 
-HAM radio packets have different configurations for differents command and command type, and those configurations can be seen in the section below.
+HAM radio packets have different configurations for different command and command type, and those configurations can be seen in the section below.
 
 **HAM Radio User Packets**:
 
@@ -277,7 +277,7 @@ In the figure above we can see a call sign, it consist of two parts 'Prefix' and
 
 This HAM radio packet configuration shown above is used to send a message to another user.
 The 'HAM CRC' is a value used to check if the message is changed since it was created,
-it is automatically calulated from the :ref:`encryption sofware <ENCR>`.
+it is automatically calculated from the :ref:`encryption software <ENCR>`.
 The 'Command Type' must be 'u' because its a user command and 'Command' must be set to 's'.
 The 'Sender Call Sign' is the call sign of the user who is sending the message,
 the 'Recipient Call Sign' is the call sign of the user supposed to receive the message and the 'Message' part is the message to transmit.
@@ -297,14 +297,14 @@ This HAM radio packet configuration shown above is used to ask the satellite if 
 The 'Command Type' must be 'u' because its a user command and The 'Command' must be set to 'a'.
 The 'Sender Call Sign' is the call sign for which the satellite will search a stored message.
 
-When the user sends this packet and the satellite receives it, the HAM radio messaging system task will check the validity, creat a packet containing the
+When the user sends this packet and the satellite receives it, the HAM radio messaging system task will check the validity, create a packet containing the
 message and send it to the :ref:`Radio TX Queue <ham-queues-definition-table>` if there is a message for the requested call sign (therefore the requesting user).
 Then the Radio Interface Task will handle the transmission of this packet to the user.
 
 .. figure:: /_static/ham_message_sat.svg
       :scale: 120 %
       :align: center
-      :alt: Ask message command responce packet configuration
+      :alt: Ask message command response packet configuration
 
 This HAM radio packet configuration shown above is used when the message is sent to a user from the satellite.
 It is basically what you will get when yo have sent the command 'ask message' to the satellite and the satellite found a message matching your call sign.
@@ -344,13 +344,13 @@ This HAM radio packet configuration shown above is used to get the timestamp, th
 The 'Command Type' must be 'u' because its a user command and the 'Command' must be set to 'c'.
 
 When the user send this packet and the satellite receives it, the HAM radio messaging system task will check the validity, check if there are saved messages,  
-creat a packet containing the identifiers of those saved messages and send it to the :ref:`radio TX queue <ham-queues-definition-table>`. 
+create a packet containing the identifiers of those saved messages and send it to the :ref:`radio TX queue <ham-queues-definition-table>`. 
 Then the radio interface task will handle the transmission of this packet to the user.
 
 .. figure:: /_static/ham_rep.svg
       :scale: 120 %
       :align: center
-      :alt: Get messages id command responce packet configuration
+      :alt: Get messages id command response packet configuration
 
 The HAM radio packet configuration shown above is what you will get when you have sent the command 'Get Saved Messages ID' to the satellite 
 and if there is saved messages in the satellite.
@@ -373,14 +373,14 @@ When the satellite receive this packet it will check if the password is correct 
 
 * Change Sent Message Delay Command
 
-.. figure:: /_static/ham_delay_cmd.svg
+.. figure:: /_static/ham_delay_cmd2.svg
       :scale: 120 %
       :align: center
       :alt: Change sent message delay command packet configuration
 
 This HAM radio packet configuration shown above is used to change the delay time given before deleting the saved messages that have the sent tag. 
-The 'Command Type' must be 'a' because its a admin command and the 'Command' must be set to 't'. The delay value field work with bytes, so per example 
-if you want to change the value with 20 you should configure the delay value field with two separate bytes like '2' and '0'.
+The 'Command Type' must be 'a' because its a admin command and the 'Command' must be set to 't'. The delay value field is limited to 3 bytes and work with string, so per example 
+if you want to change the value with 20 seconds you should configure the delay value field with two separate bytes like '2' and '0'. The maximum value that can be sent is 999 seconds(16,65 minutes).
 The HAM radio messaging system has a default value for the sent message delay and this value can see in the :ref:`Message Constraints and Constants Table <CONS>`.
 
 When the admin send this packet and the satellite receives it, the HAM radio messaging system task will will check if the password is correct, 
@@ -394,9 +394,9 @@ check the length of value sent, change the delay value with the new one and save
       :alt: Change not sent message delay command packet configuration
 
 This HAM radio packet configuration shown above is used to change the delay time given before deleting the saved messages that have the not sent tag. 
-The 'Command Type' must be 'a' because its a admin command and the 'Command' must be set to 'n'. The delay value field work with bytes, so per example 
-if you want to change the value with 20 you should configure the delay value field with two separate bytes like '2' and '0'.
-The HAM radio messaging system has a default value for the not sent message delay and this value can see in the :ref:`Message Constraints and Constants Table <CONS>`.
+The 'Command Type' must be 'a' because its a admin command and the 'Command' must be set to 'n'. The delay value field is limited to 3 bytes and work with string, so per example 
+if you want to change the value with 20 seconds you should configure the delay value field with two separate bytes like '2' and '0'. The maximum value that can be sent is 999999 seconds(11,57 days).
+The HAM radio messaging system has a default and minimum value for the not sent message delay and this value can see in the :ref:`Message Constraints and Constants Table <CONS>`.
 
 When the admin send this packet and the satellite receives it, the HAM radio messaging system task will check if the password is correct, 
 check the length of value sent, change the delay value with the new one and save this new value in the :ref:`eeprom <EEP>`.
@@ -428,12 +428,12 @@ There are several different case which reply a ACK/NACK packet, those case can b
       :align: center
       :alt: ACK/NACK packet Data field configuration
 
-The HAM radio messaging system task also uses the :ref:`radio packet <RP>` with 2 bytes in the 'data to send' field to creat ACK/NACK packets. 
+The HAM radio messaging system task also uses the :ref:`radio packet <RP>` with 2 bytes in the 'data to send' field to create ACK/NACK packets. 
 In the figure above we can see the ACK/NACK packet. The first field, 'Type Code', is used to identify the type of the packet. The second field, 
 'ACK/NACK packet message code', is used to identify the message that give more details about the ACK/NACK.
-The HAM radio messaging system task will creat a ACK/NACK packet based on the situation and send it to the Radio TX Queue. 
+The HAM radio messaging system task will create a ACK/NACK packet based on the situation and send it to the Radio TX Queue. 
 Then the radio interface task will handle the transmission of this packet to the user.
-More informations about ACK/NACK packets can be seen in the tables below.
+More information about ACK/NACK packets can be seen in the tables below.
 
 .. table:: ACK/NACK packet type
    :widths: auto
@@ -469,6 +469,8 @@ More informations about ACK/NACK packets can be seen in the tables below.
    NACK    0x10                      The password is invalid
    NACK    0x11                      The password in the double confirmation is not the same as each other
    NACK    0x12                      The length of the delay value sent from user is to long
+   NACK    0x13                      The delay value sent from user contain invalid character
+   NACK    0x14                      The not sent message delay value sent from user is to small
    ==== ============================ ====================================================================
 
 .. _EEP:
@@ -485,7 +487,7 @@ Some of the important data/value sent from GS/User are saved in eeprom so that i
    *  - Saved data
       - Description
       - Eeprom Address
-   *  - Ham radio packet with send message comand
+   *  - Ham radio packet with send message command
       - The HAM Radio packets sent containing a message
       - 1-20
    *  - Sent message delay value
@@ -518,10 +520,14 @@ The constraints and constants concerning HAM radio messages are listed in the ta
       - 20
    *  - The maximum allowed number of storable message for a sender
       - 1
-   *  - The default delay time given before deleting messages with the sent tag (in seconds)
-      - 10
-   *  - The default delay time given before deleting messages with the not sent tag (in seconds)
-      - 86400
+   *  - The default delay time given before deleting messages with the sent tag
+      - 20 seconds
+   *  - The minimum delay value that can be set for the sent messages
+      - 0 seconds
+   *  - The default delay time given before deleting messages with the not sent tag
+      - 86400 seconds(24 hours)
+   *  - The minimum delay value that can be set for the not sent messages
+      - 43200 seconds(12 hours)
 
 The characters available in the Ham radio messaging system are shown below.
 
@@ -555,7 +561,7 @@ This encryption/decryption process is achieved with the help of the :ref:`data d
 DDP(Data Diffusion Platform)
 ----------------------------
 The DDP is used to send data to CSUM external partners. This data can be mission data or other types of data that needs to shared. 
-We have also devloped a part for the ROBUSTA 3A mission and the HAM Radio messaging system. With this, 
+We have also developed a part for the ROBUSTA 3A mission and the HAM Radio messaging system. With this, 
 users will be able to create their encrypted :ref:`HAM radio packets <HAMP>` to send them or decrypt their 
 received :ref:`HAM radio packets <HAMP>` to read the message they contain. A general view of the DDP can be seen in the image below.
 
