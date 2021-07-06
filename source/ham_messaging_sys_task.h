@@ -7,24 +7,26 @@
 
 #include "app/rob3u/ttc_setup.h"
 
-#define HAM_MAX_MSG_NBR 20U                /**< Maximum number of storable messages. */
-#define HAM_ALLOWED_MSG_NBR 1U             /**< The maximum allowed number of storable message per person. */
-#define HAM_SENT_MSG_DELAY 10U             /**< The time given before deleting messages with the sent tag in second. */
-#define HAM_NOT_SENT_MSG_DELAY 60U         /**< The time given before deleting messages with the not sent tag in second. */
-#define HAM_MAX_MSG_LEN 20U                /**< The maximum length of the message. */
-#define HAM_TAG_LEN 1U                     /**< Packet tag length. */
-#define HAM_CRC_LEN 2U                     /**< HAM_CRC_length. */
-#define HAM_CALL_SIGN_LEN 6U               /**< The length of the the call sign. */
-#define HAM_TIMESTAMP_LEN 4U               /**< Packet timestamp length. */
-#define HAM_ACK_NACK_PCKT_LEN 2U           /**< The data lengt of the ACK/NACK packet. */
-#define HAM_PWD_LEN 6U                     /**< The length of admin password. */
-#define HAM_MSG_MAX_DELAY_LEN 6U           /**< The maximum length of messages delay value. */
-#define HAM_ADMIN_PCKT_DATA_LEN 12U        /**< The length of the admin packet data field. */
-#define HAM_MSG_EEPROM_ADDR 0U             /**< Eeprom starting addres of the saved packet. */
-#define HAM_PWD_ADDR 21U                   /**< Eeprom starting addres of the saved password. */
-#define HAM_SENT_MSG_DELAY_ADDR 22U        /**< Eeprom starting addres of the sent message delay value. */
-#define HAM_NOT_SENT_MSG_DELAY_ADDR 23U    /**< Eeprom starting addres of the not sent message delay value. */
-#define HAM_PCKT_CMD_TYPE_INDEX 2U         /**< The index number of the byte representing the command type. */
+#define HAM_MAX_MSG_NBR 20U                    /**< Maximum number of storable messages. */
+#define HAM_ALLOWED_MSG_NBR 1U                 /**< The maximum allowed number of storable message per person. */
+#define HAM_SENT_MSG_DELAY 10U                 /**< The time given before deleting messages with the sent tag in second. */
+#define HAM_NOT_SENT_MSG_DELAY 86400U          /**< The time given before deleting messages with the not sent tag in second. */
+#define HAM_MAX_MSG_LEN 20U                    /**< The maximum length of the message. */
+#define HAM_TAG_LEN 1U                         /**< Packet tag length. */
+#define HAM_CRC_LEN 2U                         /**< HAM_CRC_length. */
+#define HAM_CALL_SIGN_LEN 6U                   /**< The length of the the call sign. */
+#define HAM_TIMESTAMP_LEN 4U                   /**< Packet timestamp length. */
+#define HAM_ACK_NACK_PCKT_LEN 2U               /**< The data length of the ACK/NACK packet. */
+#define HAM_PWD_LEN 6U                         /**< The length of admin password. */
+#define HAM_NOT_SENT_MSG_MAX_DELAY_LEN 6U      /**< The maximum length of messages delay value. */
+#define HAM_NOT_SENT_MSG_MIN_DELAY_VAL 43200U  /**< The minimum delay value that can be set for sent messages. */
+#define HAM_SENT_MSG_MAX_DELAY_LEN 3U          /**< The maximum length of messages delay value. */
+#define HAM_ADMIN_PCKT_DATA_LEN 12U            /**< The length of the admin packet data field. */
+#define HAM_MSG_EEPROM_ADDR 0U                 /**< Eeprom starting addres of the saved packet. */
+#define HAM_PWD_ADDR 21U                       /**< Eeprom starting addres of the saved password. */
+#define HAM_SENT_MSG_DELAY_ADDR 22U            /**< Eeprom starting addres of the sent message delay value. */
+#define HAM_NOT_SENT_MSG_DELAY_ADDR 23U        /**< Eeprom starting addres of the not sent message delay value. */
+#define HAM_PCKT_CMD_TYPE_INDEX 2U             /**< The index number of the byte representing the command type. */
 #define HAM_ID_LEN ((2*HAM_CALL_SIGN_LEN)+HAM_TAG_LEN) /**< The length of the id part, that include the tag length, the recipient and sender call sign length.. */
 #define HAM_CACHE_MSG_DATA_LEN (uint8_t)((HAM_CALL_SIGN_LEN*2)+(HAM_TAG_LEN)+(HAM_TIMESTAMP_LEN)) /**< The total length of the data saved in the cache for one ham raio packet. */
 #define HAM_MAX_CACHE_MSG_NBR (uint8_t)(((TTC_CSP_BUFFER_DATA_SIZE)-(TTC_CSP_CRC_FIELD_LEN))/(HAM_CACHE_MSG_DATA_LEN)) /**< The maximum number of cache message can be sent at once. */
@@ -135,17 +137,19 @@ typedef enum {
  *  Enum containing nack message codes.
  */
 typedef enum {
-    HAM_INV_CMD = 0x08,                  /**< NACK message code that saying that the command is invalid. */
-    HAM_MAX_MSG_NBR_REACHED = 0x09,      /**< NACK message code that saying that the storable maximum message number has been reached. */
-    HAM_INV_CRC = 0x0A,                  /**< NACK message code that saying that the HAM CRC is invalid. */
-    HAM_NO_MSG = 0x0B,                   /**< NACK message code that saying that there is no message for the given call sign. */
-    HAM_MAX_MSG_LEN_EXCEED = 0x0C,       /**< NACK message code that saying that the the maximum length of the message exceeded. */
-    HAM_ALLOWED_MSG_NBR_REACHED = 0x0D,  /**< NACK message code that saying that the maximum allowed number of storable message per person has been reached. */
-    HAM_NO_SAVED_MSG = 0x0E,             /**< NACK message code that saying that there are no saved messages. */
-    HAM_INV_CMD_TYPE = 0x0F,             /**< NACK message code that saying that the command type is invalid. */
-    HAM_INV_PWD = 0x10,                  /**< NACK message code that saying that the password is invalid. */
-    HAM_PWD_NOT_EQ = 0x11,               /**< NACK message code that saying that the password in the double confirmation is not the same as each other. */
-    HAM_MSG_MAX_DELAY_LEN_EXCEED = 0x12, /**< NACK message code that saying the length of the delay value sent from user is to long. */
+    HAM_INV_CMD = 0x08,                     /**< NACK message code that saying that the command is invalid. */
+    HAM_MAX_MSG_NBR_REACHED = 0x09,         /**< NACK message code that saying that the storable maximum message number has been reached. */
+    HAM_INV_CRC = 0x0A,                     /**< NACK message code that saying that the HAM CRC is invalid. */
+    HAM_NO_MSG = 0x0B,                      /**< NACK message code that saying that there is no message for the given call sign. */
+    HAM_MAX_MSG_LEN_EXCEED = 0x0C,          /**< NACK message code that saying that the the maximum length of the message exceeded. */
+    HAM_ALLOWED_MSG_NBR_REACHED = 0x0D,     /**< NACK message code that saying that the maximum allowed number of storable message per person has been reached. */
+    HAM_NO_SAVED_MSG = 0x0E,                /**< NACK message code that saying that there are no saved messages. */
+    HAM_INV_CMD_TYPE = 0x0F,                /**< NACK message code that saying that the command type is invalid. */
+    HAM_INV_PWD = 0x10,                     /**< NACK message code that saying that the password is invalid. */
+    HAM_PWD_NOT_EQ = 0x11,                  /**< NACK message code that saying that the password in the double confirmation is not the same as each other. */
+    HAM_MSG_MAX_DELAY_LEN_EXCEED = 0x12,    /**< NACK message code that saying the length of the delay value sent from user is to long. */
+    HAM_MSG_DELAY_VAL_INCL_INV_CHAR = 0x13, /**< NACK message code that saying the delay value sent from user contain invalid character which is impossible to convert to int. */
+    HAM_MSG_DELAY_VAL_SMALL = 0x14,         /**< NACK message code that saying the delay value sent from user is to small. */
 }ham_nack_msg_code_t;
 
 /** @typedef ham_ack_msg_code_t.
@@ -219,7 +223,7 @@ void ham_build_cache_csp_pckt(csp_packet_t *cache_csp_pckt,const csp_id_t *src_p
  *  @param ham_pckt_id_cache Array where the tags and call signs are stored.
  *  @param ham_pckt_timestamp_cache Array where timestamps are stored.
  *  @param ham_pckt_cnt Pointer to the hamradio packet count.
- *  @param pwd Array where the passwordis stored.
+ *  @param pwd Array where the password is stored.
  *  @param msg_delay Pointer to ham_msg_delay_t.
  */
 void ham_update_data_from_eeprom(uint8_t ham_pckt_id_cache[][HAM_ID_LEN],uint32_t ham_pckt_timestamp_cache[],uint8_t *ham_pckt_cnt,uint8_t pwd[],ham_msg_delay_t *msg_delay);
@@ -305,7 +309,7 @@ void ham_handle_del_all_msg_cmd(const QueueHandle_t radio_tx_queue,const csp_id_
  *  @param radio_tx_queue The handle of the radio TX queue.
  *  @param rx_pckt_id Pointer to csp_id_t.
  *  @param ham_pckt Pointer to ham_user_packet_t.
- *  @param pwd Array where the passwordis stored.
+ *  @param pwd Array where the password is stored.
  *  @param debug Debug state.
  */
 void ham_handle_upd_pwd_cmd(const QueueHandle_t radio_tx_queue,const csp_id_t *rx_pckt_id,ham_admin_packet_t *ham_pckt,uint8_t pwd[],uint8_t debug);
@@ -329,9 +333,21 @@ void ham_handle_user_cmd(const ham_msg_sys_task_params_t *params,const csp_packe
  *  @param ham_pckt_timestamp_cache Array where timestamps are stored.
  *  @param ham_pckt_cnt Pointer to the hamradio packet count.
  *  @param msg_delay Pointer to the delay value.
- *  @param pwd Array where the passwordis stored.
+ *  @param pwd Array where the password is stored.
  *  @param debug Debug state.
  */
 void ham_handle_admin_cmd(const ham_msg_sys_task_params_t *params,const csp_packet_t *rx_pckt,uint8_t ham_pckt_id_cache[][HAM_ID_LEN],uint8_t *ham_pckt_cnt,ham_msg_delay_t *msg_delay,uint8_t pwd[],uint8_t debug);
 
+/**
+ *  @brief Convert string to int value, it is a simplified/modified atoi() function that run faster.
+ *  @param buffer Pointer to the buffer to convert.
+ *  @param len Length of the buffer.
+ *  @param res Pointer to the result.
+ * 
+ *  @return 0 if success, 1 if error.
+ */
+
+uint8_t string_to_int(const uint8_t *buffer,uint8_t len,uint32_t *res);
+
 #endif
+

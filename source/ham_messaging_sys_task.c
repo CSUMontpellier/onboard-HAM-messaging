@@ -503,11 +503,11 @@ void ham_handle_get_cache_cmd(const QueueHandle_t radio_tx_queue,const csp_id_t 
 void ham_handle_upd_not_sent_msg_delay_cmd(const QueueHandle_t radio_tx_queue,const csp_id_t *rx_pckt_id,ham_admin_packet_t *ham_pckt,uint32_t *msg_delay,uint8_t debug){
     
     static csp_packet_t *ack_nack_csp_pckt = NULL;
-
+    uint32_t res=0;
     const uint8_t msg_delay_len=strnlen((char*)ham_pckt->data,HAM_ADMIN_PCKT_DATA_LEN);
 
     /* Check if lengt of the sent value is greater than HAM_MSG_MAX_DELAY_LEN. */
-    if (msg_delay_len>HAM_MSG_MAX_DELAY_LEN)
+    if (msg_delay_len>HAM_NOT_SENT_MSG_MAX_DELAY_LEN)
     {
         ack_nack_csp_pckt = csp_buffer_get(csp_buffer_data_size());
         if (ack_nack_csp_pckt==NULL) return;
@@ -517,7 +517,30 @@ void ham_handle_upd_not_sent_msg_delay_cmd(const QueueHandle_t radio_tx_queue,co
         return;
     }
 
-    *msg_delay=atoi((char*)ham_pckt->data);
+    const uint8_t rv=string_to_int(ham_pckt->data,msg_delay_len,&res);
+    if (rv)
+    {   
+        /* Check if the value sent from user contain letter and send NACK if it is containing. */
+        ack_nack_csp_pckt = csp_buffer_get(csp_buffer_data_size());
+        if (ack_nack_csp_pckt==NULL) return;
+        ham_build_ack_nack_csp_pckt(ack_nack_csp_pckt,rx_pckt_id,RADIO_ACK_CODE_NACK,HAM_MSG_DELAY_VAL_INCL_INV_CHAR);
+        push_packet_to_radio_tx_queue(ack_nack_csp_pckt,radio_tx_queue);
+        debug_printf_def_trace(debug, "The value sent from user contain invalid character.\n\r");
+        return;
+    }
+
+    if (res<HAM_NOT_SENT_MSG_MIN_DELAY_VAL)
+    {   
+        /* Check if the delay value sent is below of the minimum value and send NACK if it is below. */
+        ack_nack_csp_pckt = csp_buffer_get(csp_buffer_data_size());
+        if (ack_nack_csp_pckt==NULL) return;
+        ham_build_ack_nack_csp_pckt(ack_nack_csp_pckt,rx_pckt_id,RADIO_ACK_CODE_NACK,HAM_MSG_DELAY_VAL_SMALL);
+        push_packet_to_radio_tx_queue(ack_nack_csp_pckt,radio_tx_queue);
+        debug_printf_def_trace(debug, "The delay value sent from user is to small.\n\r");
+        return;
+    }
+
+    *msg_delay=res;
 
     /* Message delay is changed, save the change in the eeprom, creat and send ACK. */
     debug_printf_def_trace(debug, "Not sent message delay updated successfully.\n\r");
@@ -534,8 +557,8 @@ void ham_handle_upd_sent_msg_delay_cmd(const QueueHandle_t radio_tx_queue,const 
 
     const uint8_t msg_delay_len=strnlen((char*)ham_pckt->data,HAM_ADMIN_PCKT_DATA_LEN);
 
-    /* Check if lengt of the sent value is greater than HAM_MSG_MAX_DELAY_LEN. */
-    if (msg_delay_len>HAM_MSG_MAX_DELAY_LEN)
+    /* Check if length of the sent value is greater than HAM_MSG_MAX_DELAY_LEN. */
+    if (msg_delay_len>HAM_SENT_MSG_MAX_DELAY_LEN)
     {
         ack_nack_csp_pckt = csp_buffer_get(csp_buffer_data_size());
         if (ack_nack_csp_pckt==NULL) return;
@@ -545,7 +568,16 @@ void ham_handle_upd_sent_msg_delay_cmd(const QueueHandle_t radio_tx_queue,const 
         return;
     }
 
-    *msg_delay=atoi((char*)ham_pckt->data);
+    const uint8_t rv=string_to_int(ham_pckt->data,msg_delay_len,msg_delay);
+    if (rv)
+    {   /* Check if the value sent from user contain letter and send NACK if it is containing. */
+        ack_nack_csp_pckt = csp_buffer_get(csp_buffer_data_size());
+        if (ack_nack_csp_pckt==NULL) return;
+        ham_build_ack_nack_csp_pckt(ack_nack_csp_pckt,rx_pckt_id,RADIO_ACK_CODE_NACK,HAM_MSG_DELAY_VAL_INCL_INV_CHAR);
+        push_packet_to_radio_tx_queue(ack_nack_csp_pckt,radio_tx_queue);
+        debug_printf_def_trace(debug, "The value sent from user contain invalid character.\n\r");
+        return;
+    }
 
     /* Message delay is changed, save the change in the eeprom, creat and send ACK. */
     debug_printf_def_trace(debug, "Sent message delay updated successfully.\n\r");
@@ -613,7 +645,7 @@ void ham_handle_upd_pwd_cmd(const QueueHandle_t radio_tx_queue,const csp_id_t *r
         return;
     }
 
-    /* Assigne the new password instead of the old one and save it in the eeprom. */
+    /* Assign the new password instead of the old one and save it in the eeprom. */
     memcpy(pwd,&ham_pckt->data[0],HAM_PWD_LEN);
     eeprom_write_byte_array(HAM_PWD_ADDR,pwd,HAM_PWD_LEN);
 
@@ -696,4 +728,21 @@ void ham_handle_admin_cmd(const ham_msg_sys_task_params_t *params,const csp_pack
         push_packet_to_radio_tx_queue(ack_nack_csp_pckt, params->radio_tx_queue);
         debug_printf_def_trace(debug, "Invalid password.\n\r");
     }
+}
+
+uint8_t string_to_int(const uint8_t *buffer,uint8_t len,uint32_t *res)
+{
+    uint32_t number=0;
+    for (uint8_t i = 0; i < len; i++)
+    {   
+        uint8_t is_num =(*buffer >= 48) && (*buffer<= 57);
+        if (!is_num)
+        {
+            return 1;
+        }
+        number=((number<<3)+(number<<1))+(*buffer-48);
+        buffer++;
+    }
+    *res=number;
+    return 0;
 }
