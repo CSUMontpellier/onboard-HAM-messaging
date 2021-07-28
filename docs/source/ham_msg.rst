@@ -394,7 +394,7 @@ check the length of value sent, change the delay value with the new one and save
       :alt: Change not sent message delay command packet configuration
 
 This HAM radio packet configuration shown above is used to change the delay time given before deleting the saved messages that have the not sent tag. 
-The 'Command Type' must be 'a' because its a admin command and the 'Command' must be set to 'n'. The delay value field is limited to 3 bytes and work with string, so per example 
+The 'Command Type' must be 'a' because its a admin command and the 'Command' must be set to 'n'. The delay value field is limited to 6 bytes and work with string, so per example 
 if you want to change the value with 20 seconds you should configure the delay value field with two separate bytes like '2' and '0'. The maximum value that can be sent is 999999 seconds(11,57 days).
 The HAM radio messaging system has a default and minimum value for the not sent message delay and this value can see in the :ref:`Message Constraints and Constants Table <CONS>`.
 
