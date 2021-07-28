@@ -59,7 +59,6 @@ void ham_messaging_sys_task(void *task_params) {
         if(ham_pckt_rx_queue_count == 0) continue;
         while (ham_pckt_rx_queue_count>0)
         {   
-            memset(&rx_pckt,0,csp_buffer_data_size());
             rv = xQueueReceive(params->ham_packet_rx_queue, &rx_pckt, 0);
             if(rv == pdFALSE) {
                 debug_printf_def_trace(debug,
@@ -122,7 +121,6 @@ void ham_build_ack_nack_csp_pckt(csp_packet_t *ack_nack_csp_pckt,const csp_id_t 
     ack_nack_csp_pckt->length = HAM_ACK_NACK_PCKT_LEN;
     ack_nack_csp_pckt->data[0] = type_code; 
     ack_nack_csp_pckt->data[1] = msg_code;
-    // TODO : add delay before sending ? 
 }
 
 void ham_build_ham_csp_pckt(csp_packet_t *ham_csp_pckt, const ham_user_packet_t *data_to_send, const csp_id_t *src_pckt_id) {
@@ -137,8 +135,6 @@ void ham_build_ham_csp_pckt(csp_packet_t *ham_csp_pckt, const ham_user_packet_t 
 
     memcpy(ham_csp_pckt->data,data_to_send,sizeof(ham_user_packet_t));
     ham_encrypt_pckt_data(ham_csp_pckt->data,ham_csp_pckt->length,(HAM_TAG_LEN+HAM_CRC_LEN+HAM_TIMESTAMP_LEN));
-    
-    // TODO : add delay before sending ? 
 }
 
 void ham_build_cache_csp_pckt(csp_packet_t *cache_csp_pckt,const csp_id_t *src_pckt_id,const uint8_t *data_to_send,const uint8_t data_len,const uint8_t cache_msg_nbr){
@@ -661,7 +657,7 @@ void ham_handle_user_cmd(const ham_msg_sys_task_params_t *params,const csp_packe
                 
     static csp_packet_t *ack_nack_csp_pckt = NULL;
     ham_user_packet_t ham_pckt ={0};
-    memcpy(&(ham_pckt.data), rx_pckt->data, sizeof(ham_user_pckt_data_t));
+    memcpy(&(ham_pckt.data), rx_pckt->data, rx_pckt->length);
     
     /* Check the command. */
     switch (ham_pckt.data.command)
@@ -690,7 +686,7 @@ void ham_handle_admin_cmd(const ham_msg_sys_task_params_t *params,const csp_pack
     uint8_t rv=0;
     static csp_packet_t *ack_nack_csp_pckt = NULL;
     ham_admin_packet_t ham_pckt ={0};
-    memcpy(&(ham_pckt), rx_pckt->data, sizeof(ham_admin_packet_t));
+    memcpy(&(ham_pckt), rx_pckt->data, rx_pckt->length);
                 
     rv=strncmp((char*)ham_pckt.pwd,(char*)pwd,HAM_PWD_LEN);
     if (rv==0)

@@ -10,7 +10,7 @@
 #define HAM_MAX_MSG_NBR 20U                    /**< Maximum number of storable messages. */
 #define HAM_ALLOWED_MSG_NBR 1U                 /**< The maximum allowed number of storable message per person. */
 #define HAM_SENT_MSG_DELAY 10U                 /**< The time given before deleting messages with the sent tag in second. */
-#define HAM_NOT_SENT_MSG_DELAY 86400U          /**< The time given before deleting messages with the not sent tag in second. */
+#define HAM_NOT_SENT_MSG_DELAY 60U          /**< The time given before deleting messages with the not sent tag in second. */
 #define HAM_MAX_MSG_LEN 20U                    /**< The maximum length of the message. */
 #define HAM_TAG_LEN 1U                         /**< Packet tag length. */
 #define HAM_CRC_LEN 2U                         /**< HAM_CRC_length. */
@@ -19,7 +19,7 @@
 #define HAM_ACK_NACK_PCKT_LEN 2U               /**< The data length of the ACK/NACK packet. */
 #define HAM_PWD_LEN 6U                         /**< The length of admin password. */
 #define HAM_NOT_SENT_MSG_MAX_DELAY_LEN 6U      /**< The maximum length of messages delay value. */
-#define HAM_NOT_SENT_MSG_MIN_DELAY_VAL 43200U  /**< The minimum delay value that can be set for sent messages. */
+#define HAM_NOT_SENT_MSG_MIN_DELAY_VAL 0U  /**< The minimum delay value that can be set for sent messages. */
 #define HAM_SENT_MSG_MAX_DELAY_LEN 3U          /**< The maximum length of messages delay value. */
 #define HAM_ADMIN_PCKT_DATA_LEN 12U            /**< The length of the admin packet data field. */
 #define HAM_MSG_EEPROM_ADDR 0U                 /**< Eeprom starting addres of the saved packet. */
@@ -350,4 +350,3 @@ void ham_handle_admin_cmd(const ham_msg_sys_task_params_t *params,const csp_pack
 uint8_t string_to_int(const uint8_t *buffer,uint8_t len,uint32_t *res);
 
 #endif
-
